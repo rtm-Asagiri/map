@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
 
-    <!-- 1. 換成最穩定的 Cloudflare Leaflet CSS -->
+    <!-- Cloudflare Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 
     <style>
@@ -124,7 +124,7 @@
             backdrop-filter: blur(2px);
         }
 
-        /* 🪐 現代日本機構圓點標籤樣式 */
+        /* 圓點標籤 */
         .custom-jp-marker {
             display: flex;
             align-items: center;
@@ -163,11 +163,11 @@
         縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <!-- 2. 換成最穩定的 Cloudflare Leaflet JS （放在你寫程式之前） -->
+    <!-- 2.  Cloudflare Leaflet JS （放在你寫程式之前） -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     
     <script>
-        // 🛠️ 修正點：補全完整的邊界陣列與數值
+        // 邊界陣列與數值
         const mapWidth = 5000;
         const mapHeight = 5000;
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
@@ -180,7 +180,7 @@
             maxZoom: 3
         });
 
-        const mapImageUrl = './map.svg';
+        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/a4895ae0a07de41a5c4040369be3cb895d0620c2/assets/map.svg';
 
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
@@ -207,7 +207,7 @@
             closeSidebar();
         });
 
-        // 🎯 根據日本現代機構屬性返回對應的顏色與記號
+        // 對應顏色與記號
         function getMarkerStyle(type) {
             switch(type) {
                 case '郵局':
