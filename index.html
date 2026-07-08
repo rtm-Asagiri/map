@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
 
-    <!-- 補全 Leaflet CSS 連結 -->
-    <link rel="stylesheet" href="https://unpkg.com">
+    <!-- 1. 換成最穩定的 Cloudflare Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 
     <style>
         * {
@@ -163,24 +163,26 @@
         縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <!-- 補全 Leaflet JS 腳本 -->
-    <script src="https://unpkg.com"></script>
+    <!-- 2. 換成最穩定的 Cloudflare Leaflet JS （放在你寫程式之前） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    
     <script>
+        // 🛠️ 修正點：補全完整的邊界陣列與數值
         const mapWidth = 5000;
         const mapHeight = 5000;
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
         const map = L.map('map', {
             crs: L.CRS.Simple,
-            zoomControl: false,
+            zoomControl: true,
             attributionControl: false,
             minZoom: -3,
             maxZoom: 3
         });
 
-        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/767d7111508f28f2641a8ffb88e82bf9d95c98f9/Frame%204.svg';
+        const mapImageUrl = './map.svg';
 
-        L.imageOverlay(mapImageUrl, mapBounds,{crossOrigin:true}).addTo(map);
+        L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
@@ -244,43 +246,36 @@
                 data.forEach(loc => {
                     const style = getMarkerStyle(loc.type);
 
-                    // 建立自訂的現代地圖風圖標（修正原程式碼遺漏的 iconSize）
-                    const jpIcon = L.divIcon({
-                        className: 'custom-jp-marker',
-                        html: style.text,
-                        iconSize:,       
-                        iconAnchor: [13, 13]
-                    });
+                    // 🛠️ 修正點：補上正確的圓圈大小與定錨點數字
+                    const jpIcon=L.divIcon({className:'',html:`<div class="custom-jp-marker" style="width:26px;height:26px;border-radius:50%;background:${style.color};display:flex;align-items:center;justify-content:center;">${style.text}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
 
                     const marker = L.marker(loc.coords, { icon: jpIcon }).addTo(map);
                     
                     // 將背景色灌入對應的圖標元素中
-                    marker.getElement().style.backgroundColor = style.color;
+                    if (marker.getElement()) {
+                        marker.getElement().style.backgroundColor = style.color;
+                    }
 
-                    // 補全被截斷的點擊事件
+                    // 點擊地標打開側邊欄
                     marker.on('click', function(event) {
                         L.DomEvent.stopPropagation(event);
                         map.panTo(loc.coords, { animate: true, duration: 0.5 });
 
                         if (loc.image && loc.image.trim() !== "") {
                             document.getElementById('sidebar-hero').style.backgroundImage = `url('${loc.image}')`;
-                            document.getElementById('sidebar-hero').style.backgroundColor = 'transparent';
                         } else {
                             document.getElementById('sidebar-hero').style.backgroundImage = 'none';
-                            document.getElementById('sidebar-hero').style.backgroundColor = style.color;
                         }
-
-                        document.getElementById('sidebar-title').innerText = loc.name;
-                        document.getElementById('sidebar-category').innerText = `【${loc.type || '未分類'}】${loc.category || ''}`;
-                        document.getElementById('sidebar-desc').innerText = loc.desc || '暫無說明';
                         
-                        // 顯現左側資訊面板
+                        document.getElementById('sidebar-title').innerText = loc.name || "未命名地點";
+                        document.getElementById('sidebar-category').innerText = `${loc.area || ""} / ${loc.type || ""}`;
+                        document.getElementById('sidebar-desc').innerText = loc.desc || "無詳細說明";
                         document.getElementById('sidebar').classList.add('active');
                     });
                 });
             })
             .catch(err => {
-                console.error('資料載入失敗：', err);
+                console.error("載入地標失敗，可能找不到 locations.json 檔案:", err);
             });
     </script>
 </body>
