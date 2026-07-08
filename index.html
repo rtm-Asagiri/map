@@ -164,8 +164,8 @@
 
     <script src="https://unpkg.com"></script>
     <script>
-        const mapWidth = 4000;
-        const mapHeight = 4000;
+        const mapWidth = 5000;
+        const mapHeight = 5000;
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
         const map = L.map('map', {
@@ -176,7 +176,7 @@
             maxZoom: 3
         });
 
-        const mapImageUrl = 'https://githubusercontent.com';
+        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/767d7111508f28f2641a8ffb88e82bf9d95c98f9/Frame%204.svg';
 
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
