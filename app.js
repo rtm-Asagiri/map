@@ -1,1 +1,0 @@
-document.addEventListener("DOMContentLoaded", async ()=>{window.App={config:null,categories:{},locations:[],map:null,markers:[],layers:{}};await loadConfig();await loadCategories();await initMap();await loadLocations();initSidebar();initSearch();initLayerControl();});
