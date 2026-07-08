@@ -154,18 +154,17 @@
         const map = L.map('map', {
             crs: L.CRS.Simple,
             zoomControl: false,
-            minZoom: -3,
+            minZoom: -3, // 讓 4000x4000 的大圖可以縮小看全貌
             maxZoom: 3
         });
 
-        // 定義完整邊界 [ [0, 0], [高, 寬] ] (已修正先前的陣列語法遺漏)
+        // 定義完整邊界 [[0, 0], [高, 寬]]
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
-        // 3. 【關鍵修正】利用相對路徑直接抓取同資料夾下的圖片檔
-        // 因為圖片檔名包含空白，使用 encodeURIComponent 確保網址安全
-        const mapImageUrl = encodeURI('Frame 4.jpg');
+        // 3. 【核心修正】直接指向 GitHub 官方 raw 端的絕對網址，並將空格轉為 %20 避開瀏覽器解析 Bug
+        const mapImageUrl = 'https://githubusercontent.com';
 
-        // 將架空底圖鋪上畫布
+        // 將架空底圖鋪上網頁
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
 
         // 限制地圖視野範圍並置中
@@ -195,7 +194,7 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        // 點擊地圖空白處：收回左側抽屜 ＆ 在 Console 印出該點座標（方便你採集點位）
+        // 點擊地圖空白處：收回左側抽屜 ＆ 在 Console 印出該點座標
         map.on('click', function(e) {
             closeSidebar();
             const clickY = Math.round(e.latlng.lat);
