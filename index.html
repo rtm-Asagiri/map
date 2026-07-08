@@ -180,7 +180,7 @@
             maxZoom: 3
         });
 
-        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/a4895ae0a07de41a5c4040369be3cb895d0620c2/assets/map.svg';
+        const mapImageUrl = './assets/map.svg';
 
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
@@ -237,7 +237,7 @@
         }
 
         // 動態載入外部 JSON 景點資料庫
-        fetch('locations.json')
+        fetch('./data/locations.json')
             .then(response => {
                 if (!response.ok) throw new Error('無法讀取地標資料庫');
                 return response.json();
