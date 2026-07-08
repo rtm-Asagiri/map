@@ -1,0 +1,42 @@
+[
+  {
+    "id": "government",
+    "name": "行政區",
+    "color": "#1976D2",
+    "icon": "icons/government.svg",
+    "size": 30,
+    "zIndex": 100,
+    "cluster": false,
+    "visible": true
+  },
+
+  {
+    "id": "station",
+    "name": "車站",
+    "color": "#1A73E8",
+    "icon": "icons/station.svg",
+    "size": 28,
+    "cluster": true
+  },
+
+  {
+    "id": "park",
+    "name": "景點",
+    "color": "#43A047",
+    "icon": "icons/park.svg"
+  },
+
+  {
+    "id": "restaurant",
+    "name": "餐廳",
+    "color": "#FB8C00",
+    "icon": "icons/restaurant.svg"
+  },
+
+  {
+    "id": "shopping",
+    "name": "商店",
+    "color": "#EC407A",
+    "icon": "icons/shopping.svg"
+  }
+]
