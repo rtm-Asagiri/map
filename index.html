@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
-    <!-- Leaflet CSS (已修正網址) -->
+    <!-- 引入 Leaflet 官方完整樣式 -->
     <link rel="stylesheet" href="https://unpkg.com" />
     <style>
         /* 全域重設 */
@@ -18,10 +18,10 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0d1117; /* 地圖邊界外的背景色 */
+            background-color: #0d1117; /* 地圖外的虛無背景色 */
         }
 
-        /* 隱藏 Leaflet 預設 popup */
+        /* 隱藏預設 popup */
         .leaflet-popup {
             display: none !important;
         }
@@ -123,7 +123,7 @@
 </head>
 <body>
 
-    <!-- 左側 Google 風格資訊視窗 -->
+    <!-- 左側 Google 風格面板 -->
     <div id="sidebar" class="google-sidebar">
         <div id="sidebar-hero" class="sidebar-hero">
             <button class="close-btn" onclick="closeSidebar()">×</button>
@@ -138,81 +138,56 @@
     <!-- 地圖容器 -->
     <div id="map"></div>
 
-    <!-- 右下角低調的狀態小容器 -->
+    <!-- 右下角狀態容器 -->
     <div id="status-container" class="map-status-container">
         中心座標 (Y, X): <span id="status-coords">0, 0</span> | 縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <!-- Leaflet JS (已修正網址) -->
+    <!-- 引入 Leaflet 官方完整主程式 -->
     <script src="https://unpkg.com"></script>
     <script>
-        // ----------------------------------------------------
-        // 【架空地圖參數設定】
-        // ----------------------------------------------------
-        // 1. 你的 GitHub 原始圖片網址
-        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/refs/heads/main/Frame%204.jpg'; 
-        
-        // 2. 你的地圖圖檔原始像素尺寸
+        // 1. 定義地圖尺寸 (4000x4000)
         const mapWidth = 4000;
         const mapHeight = 4000;
 
-        // ----------------------------------------------------
-        // 【地圖初始化】
-        // ----------------------------------------------------
+        // 2. 初始化 Leaflet 直角地圖
         const map = L.map('map', {
             crs: L.CRS.Simple,
             zoomControl: false,
-            minZoom: -3, // 調整至 -3，讓你能完整縮小看清 4000x4000 的大圖
-            maxZoom: 3   
+            minZoom: -3,
+            maxZoom: 3
         });
 
-        // 定義地圖的邊界
+        // 定義完整邊界 [ [0, 0], [高, 寬] ] (已修正先前的陣列語法遺漏)
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
-        // 將單張大圖鋪在地圖上
+        // 3. 【關鍵修正】利用相對路徑直接抓取同資料夾下的圖片檔
+        // 因為圖片檔名包含空白，使用 encodeURIComponent 確保網址安全
+        const mapImageUrl = encodeURI('Frame 4.jpg');
+
+        // 將架空底圖鋪上畫布
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
 
-        // 將地圖視角限制在圖片範圍內，並將畫面置中
+        // 限制地圖視野範圍並置中
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
-        // ----------------------------------------------------
-        // 【架空景點資料庫】 (保留你先不動景點的需求，僅供格式參考)
-        // ----------------------------------------------------
-        const locations = [
-            {
-                id: 1,
-                name: "起始之鎮 (測試點)",
-                category: "城鎮 • 安全區",
-                desc: "這是你的架空世界地圖起點。你可以在代碼中的 locations 陣列自由調整、新增或刪除這些點。點擊這個標記會測試左側 Google 風格面板的彈出效果。",
-                image: "https://unsplash.com",
-                coords: [mapHeight / 2, mapWidth / 2] // 預設放在 2000, 2000 地圖正中央
-            }
-        ];
+        // 4. 初始化一個「世界中心」測試標記 (位於 2000, 2000)
+        const centerCoords = [mapHeight / 2, mapWidth / 2];
+        const testMarker = L.marker(centerCoords).addTo(map);
 
-        // ----------------------------------------------------
-        // 【地圖事件與 UI 互動邏輯】
-        // ----------------------------------------------------
-        // 生成圖標
-        locations.forEach(loc => {
-            const marker = L.marker(loc.coords).addTo(map);
+        // 點擊地標互動事件
+        testMarker.on('click', function(e) {
+            L.DomEvent.stopPropagation(e); // 阻止地圖點擊事件干擾
+            map.panTo(centerCoords, { animate: true, duration: 0.5 });
             
-            marker.on('click', function(e) {
-                // 防止點擊圖標觸發地圖的點擊關閉事件
-                L.DomEvent.stopPropagation(e);
-
-                // 畫面平滑移至該點
-                map.panTo(loc.coords, { animate: true, duration: 0.5 });
-
-                // 填入左側抽屜資料
-                document.getElementById('sidebar-hero').style.backgroundImage = `url('${loc.image}')`;
-                document.getElementById('sidebar-title').innerText = loc.name;
-                document.getElementById('sidebar-category').innerText = loc.category;
-                document.getElementById('sidebar-desc').innerText = loc.desc;
-
-                // 打開面板
-                document.getElementById('sidebar').classList.add('active');
-            });
+            // 填入測試用資訊
+            document.getElementById('sidebar-hero').style.backgroundColor = '#475569';
+            document.getElementById('sidebar-title').innerText = "世界中心點";
+            document.getElementById('sidebar-category').innerText = "架空地圖 • 起點系統";
+            document.getElementById('sidebar-desc').innerText = "太棒了！地圖已經成功連線！畫面中間的藍色 Pin 針是系統預設在地圖正中央 (2000, 2000) 的測試錨點。點擊這裡就能觸發左側的 Google 風格抽屜。";
+            
+            document.getElementById('sidebar').classList.add('active');
         });
 
         // 關閉左側面板
@@ -220,24 +195,19 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        // 點擊地圖空白處：自動收回左側面板 + 【開發福利】在 Console 印出點擊點的精確座標
+        // 點擊地圖空白處：收回左側抽屜 ＆ 在 Console 印出該點座標（方便你採集點位）
         map.on('click', function(e) {
             closeSidebar();
-            
-            // 取得點擊位置的直角座標
             const clickY = Math.round(e.latlng.lat);
             const clickX = Math.round(e.latlng.lng);
-            
-            // 在瀏覽器 Console 中印出，方便你以後直接複製去新增點位
             console.log(`點擊點座標為 -> coords: [${clickY}, ${clickX}]`);
         });
 
-        // 右下角狀態小容器：即時更新地圖中心直角座標
+        // 右下角狀態欄更新
         function updateStatus() {
             const center = map.getCenter();
-            const zoom = map.getZoom();
             document.getElementById('status-coords').innerText = `${Math.round(center.lat)}, ${Math.round(center.lng)}`;
-            document.getElementById('status-zoom').innerText = zoom;
+            document.getElementById('status-zoom').innerText = map.getZoom();
         }
 
         map.on('move', updateStatus);
@@ -246,5 +216,3 @@
     </script>
 </body>
 </html>
-
-
