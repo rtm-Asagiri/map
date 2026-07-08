@@ -139,8 +139,8 @@
             transition: transform 0.2s, background-color 0.2s;
         }
         .custom-jp-marker:hover {
-            transform: scale(1.2);
-            z-index: 9999 !important;
+            transform:scale(1.2);
+        }
         }
     </style>
 </head>
@@ -247,8 +247,21 @@
                     const style = getMarkerStyle(loc.type);
 
                     // 🛠️ 修正點：補上正確的圓圈大小與定錨點數字
-                    const jpIcon=L.divIcon({className:'',html:`<div class="custom-jp-marker" style="width:26px;height:26px;border-radius:50%;background:${style.color};display:flex;align-items:center;justify-content:center;">${style.text}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
-
+                    const jpIcon = L.divIcon({
+                        className: 'jp-marker-container',
+                        html: `
+                            <div class="custom-jp-marker" 
+                                 style="
+                                 width:32px;
+                                 height:32px;
+                                 background:${style.color};
+                                 ">
+                                 ${style.text}
+                            </div>
+                        `,
+                        iconSize: [32,32],
+                        iconAnchor: [16,16]
+                    });
                     const marker = L.marker(loc.coords, { icon: jpIcon }).addTo(map);
                     
                     // 將背景色灌入對應的圖標元素中
@@ -277,6 +290,29 @@
             .catch(err => {
                 console.error("載入地標失敗，可能找不到 locations.json 檔案:", err);
             });
+            .jp-marker-container {
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-jp-marker {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:2px solid white;
+    border-radius:50%;
+
+    color:white;
+    font-weight:bold;
+    font-size:14px;
+
+    box-shadow:
+        0 2px 6px rgba(0,0,0,.35);
+
+    cursor:pointer;
+    user-select:none;
+}
     </script>
 </body>
 </html>
