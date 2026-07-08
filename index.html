@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
 
+    <!-- 補全 Leaflet CSS 連結 -->
     <link rel="stylesheet" href="https://unpkg.com">
 
     <style>
@@ -132,7 +133,7 @@
             border-radius: 50%;
             color: white;
             font-weight: bold;
-            font-size: 13px; /* 略為放大字體以容納符號 */
+            font-size: 13px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
@@ -146,7 +147,7 @@
 <body>
     <div id="sidebar" class="google-sidebar">
         <div id="sidebar-hero" class="sidebar-hero">
-            <button class="close-btn" type="button" onclick="closeSidebar()">x</button>
+            <button class="close-btn" type="button" onclick="closeSidebar()">×</button>
         </div>
         <div class="sidebar-content">
             <h2 id="sidebar-title" class="sidebar-title">地點名稱</h2>
@@ -162,6 +163,7 @@
         縮放倍率: <span id="status-zoom">0</span>
     </div>
 
+    <!-- 補全 Leaflet JS 腳本 -->
     <script src="https://unpkg.com"></script>
     <script>
         const mapWidth = 5000;
@@ -182,32 +184,53 @@
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
+        // 更新右下角座標狀態欄的函式
+        function updateStatus() {
+            const center = map.getCenter();
+            document.getElementById('status-coords').innerText = `${Math.round(center.lat)}, ${Math.round(center.lng)}`;
+            document.getElementById('status-zoom').innerText = map.getZoom();
+        }
+
+        map.on('move', updateStatus);
+        map.on('zoomend', updateStatus);
+        updateStatus();
+
+        // 側邊欄關閉控制
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+
+        // 點擊地圖空白處關閉側邊欄
+        map.on('click', function() {
+            closeSidebar();
+        });
+
         // 🎯 根據日本現代機構屬性返回對應的顏色與記號
         function getMarkerStyle(type) {
             switch(type) {
                 case '郵局':
                 case '郵便局':
-                    return { color: '#f44336', text: '〒' }; // 日本郵政經典紅與郵局符號
+                    return { color: '#f44336', text: '〒' };
                 case '學校':
                 case '教育':
-                    return { color: '#00a0a0', text: '文' }; // 日本地圖學校通用「文」字
+                    return { color: '#00a0a0', text: '文' };
                 case '景點':
                 case '觀光':
                 case '公園':
-                    return { color: '#4caf50', text: '景' }; // 觀光與綠地用生態綠
+                    return { color: '#4caf50', text: '景' };
                 case '車站':
                 case '交通':
                 case '鐵道':
-                    return { color: '#1a237e', text: '駅' }; // 交通深藍色
+                    return { color: '#1a237e', text: '駅' };
                 case '行政':
                 case '警署':
                 case '醫院':
-                    return { color: '#2196f3', text: '公' }; // 公共市政藍
+                    return { color: '#2196f3', text: '公' };
                 case '商店':
                 case '餐廳':
-                    return { color: '#ff9800', text: '商' }; // 商業橙黃色
+                    return { color: '#ff9800', text: '商' };
                 default:
-                    return { color: '#757575', text: '•' }; // 未分類預設灰點
+                    return { color: '#757575', text: '•' };
             }
         }
 
@@ -221,7 +244,7 @@
                 data.forEach(loc => {
                     const style = getMarkerStyle(loc.type);
 
-                    // 建立自訂的現代地圖風圖標
+                    // 建立自訂的現代地圖風圖標（修正原程式碼遺漏的 iconSize）
                     const jpIcon = L.divIcon({
                         className: 'custom-jp-marker',
                         html: style.text,
@@ -234,6 +257,7 @@
                     // 將背景色灌入對應的圖標元素中
                     marker.getElement().style.backgroundColor = style.color;
 
+                    // 補全被截斷的點擊事件
                     marker.on('click', function(event) {
                         L.DomEvent.stopPropagation(event);
                         map.panTo(loc.coords, { animate: true, duration: 0.5 });
@@ -247,39 +271,17 @@
                         }
 
                         document.getElementById('sidebar-title').innerText = loc.name;
-                        document.getElementById('sidebar-category').innerText = `【${loc.type || '未分類'}】${loc.category}`;
-                        document.getElementById('sidebar-desc').innerText = loc.desc;
+                        document.getElementById('sidebar-category').innerText = `【${loc.type || '未分類'}】${loc.category || ''}`;
+                        document.getElementById('sidebar-desc').innerText = loc.desc || '暫無說明';
+                        
+                        // 顯現左側資訊面板
                         document.getElementById('sidebar').classList.add('active');
                     });
                 });
             })
-            .catch(error => {
-                console.error('資料庫加載失敗:', error);
+            .catch(err => {
+                console.error('資料載入失敗：', err);
             });
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-        }
-
-        map.on('click', function(event) {
-            closeSidebar();
-            const clickY = Math.round(event.latlng.lat);
-            const clickX = Math.round(event.latlng.lng);
-            const imagePixelY = mapHeight - clickY;
-
-            console.log(`Leaflet 座標 -> coords: [${clickY}, ${clickX}]`);
-            console.log(`圖片像素座標 -> x: ${clickX}, y: ${imagePixelY}`);
-        });
-
-        function updateStatus() {
-            const center = map.getCenter();
-            document.getElementById('status-coords').innerText = `${Math.round(center.lat)}, ${Math.round(center.lng)}`;
-            document.getElementById('status-zoom').innerText = map.getZoom();
-        }
-
-        map.on('move', updateStatus);
-        map.on('zoomend', updateStatus);
-        updateStatus();
     </script>
 </body>
 </html>
