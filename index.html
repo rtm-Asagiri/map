@@ -180,7 +180,7 @@
 
         const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/767d7111508f28f2641a8ffb88e82bf9d95c98f9/Frame%204.svg';
 
-        L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
+        L.imageOverlay(mapImageUrl, mapBounds,{crossOrigin:true}).addTo(map);
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
