@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS (已修正網址) -->
     <link rel="stylesheet" href="https://unpkg.com" />
     <style>
         /* 全域重設 */
@@ -18,7 +18,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0d1117; /* 地圖邊界外的背景色，可依你的地圖風格調整 */
+            background-color: #0d1117; /* 地圖邊界外的背景色 */
         }
 
         /* 隱藏 Leaflet 預設 popup */
@@ -104,7 +104,7 @@
             color: #3c4043;
         }
 
-        /* 迷你狀態容器 (右下角座標與放大倍率) */
+        /* 迷你狀態容器 */
         .map-status-container {
             position: absolute;
             bottom: 12px;
@@ -140,34 +140,33 @@
 
     <!-- 右下角低調的狀態小容器 -->
     <div id="status-container" class="map-status-container">
-        座標 (Y, X): <span id="status-coords">0, 0</span> | 縮放倍率: <span id="status-zoom">0</span>
+        中心座標 (Y, X): <span id="status-coords">0, 0</span> | 縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- Leaflet JS (已修正網址) -->
     <script src="https://unpkg.com"></script>
     <script>
         // ----------------------------------------------------
         // 【架空地圖參數設定】
         // ----------------------------------------------------
-        // 1. 請更換成你的架空地圖圖檔路徑（可以是相對路徑，或是網路圖片網址）
+        // 1. 你的 GitHub 原始圖片網址
         const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/refs/heads/main/Frame%204.jpg'; 
         
-        // 2. 你的地圖圖檔原始像素尺寸（解析度越高，放大越清晰）
+        // 2. 你的地圖圖檔原始像素尺寸
         const mapWidth = 4000;
         const mapHeight = 4000;
 
         // ----------------------------------------------------
         // 【地圖初始化】
         // ----------------------------------------------------
-        // 使用 L.CRS.Simple 直角座標系，不使用真實地球經緯度
         const map = L.map('map', {
             crs: L.CRS.Simple,
             zoomControl: false,
-            minZoom: -2, // 允許縮小，看清地圖全貌
-            maxZoom: 2   // 允許放大的級數
+            minZoom: -3, // 調整至 -3，讓你能完整縮小看清 4000x4000 的大圖
+            maxZoom: 3   
         });
 
-        // 定義地圖的邊界（像素範圍 [0, 0] 到 [高度, 寬度]）
+        // 定義地圖的邊界
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
         // 將單張大圖鋪在地圖上
@@ -178,9 +177,8 @@
         map.setMaxBounds(mapBounds);
 
         // ----------------------------------------------------
-        // 【架空景點資料庫】(景點先不動，留做測試格式)
+        // 【架空景點資料庫】 (保留你先不動景點的需求，僅供格式參考)
         // ----------------------------------------------------
-        // 座標格式為 [Y軸, X軸]，範圍在 0 到圖檔高寬之間
         const locations = [
             {
                 id: 1,
@@ -188,7 +186,7 @@
                 category: "城鎮 • 安全區",
                 desc: "這是你的架空世界地圖起點。你可以在代碼中的 locations 陣列自由調整、新增或刪除這些點。點擊這個標記會測試左側 Google 風格面板的彈出效果。",
                 image: "https://unsplash.com",
-                coords: [mapHeight / 2, mapWidth / 2] // 預設放在地圖正中央
+                coords: [mapHeight / 2, mapWidth / 2] // 預設放在 2000, 2000 地圖正中央
             }
         ];
 
@@ -199,7 +197,10 @@
         locations.forEach(loc => {
             const marker = L.marker(loc.coords).addTo(map);
             
-            marker.on('click', function() {
+            marker.on('click', function(e) {
+                // 防止點擊圖標觸發地圖的點擊關閉事件
+                L.DomEvent.stopPropagation(e);
+
                 // 畫面平滑移至該點
                 map.panTo(loc.coords, { animate: true, duration: 0.5 });
 
@@ -219,16 +220,22 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        // 點擊地圖空白處，自動收回左側面板（增加體驗）
-        map.on('click', function() {
+        // 點擊地圖空白處：自動收回左側面板 + 【開發福利】在 Console 印出點擊點的精確座標
+        map.on('click', function(e) {
             closeSidebar();
+            
+            // 取得點擊位置的直角座標
+            const clickY = Math.round(e.latlng.lat);
+            const clickX = Math.round(e.latlng.lng);
+            
+            // 在瀏覽器 Console 中印出，方便你以後直接複製去新增點位
+            console.log(`點擊點座標為 -> coords: [${clickY}, ${clickX}]`);
         });
 
-        // 右下角狀態小容器：即時更新鼠標位置或地圖中心直角座標
+        // 右下角狀態小容器：即時更新地圖中心直角座標
         function updateStatus() {
             const center = map.getCenter();
             const zoom = map.getZoom();
-            // 顯示整數像素座標
             document.getElementById('status-coords').innerText = `${Math.round(center.lat)}, ${Math.round(center.lng)}`;
             document.getElementById('status-zoom').innerText = zoom;
         }
@@ -239,4 +246,5 @@
     </script>
 </body>
 </html>
+
 
