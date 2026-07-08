@@ -1,0 +1,1 @@
+async function initMap(){const c=App.config.map,b=[[0,0],[c.height,c.width]];App.map=L.map("map",{crs:L.CRS.Simple,minZoom:c.minZoom,maxZoom:c.maxZoom,attributionControl:false});L.imageOverlay(c.image,b).addTo(App.map);App.map.fitBounds(b);}

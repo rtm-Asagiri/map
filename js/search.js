@@ -1,0 +1,1 @@
+function initSearch(){} function initLayerControl(){Object.values(App.categories).forEach(c=>App.layers[c.id]=true);} function toggleCategory(id){App.layers[id]=!App.layers[id];App.markers.forEach(m=>{if(m.location.type!==id)return;App.layers[id]?m.addTo(App.map):m.remove();});}

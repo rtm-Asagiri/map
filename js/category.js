@@ -1,0 +1,1 @@
+async function loadCategories(){const r=await fetch("data/categories.json");const list=await r.json();App.categories={};list.forEach(i=>App.categories[i.id]=i);}

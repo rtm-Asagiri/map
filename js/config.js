@@ -1,0 +1,1 @@
+async function loadConfig(){const r=await fetch("data/config.json");App.config=await r.json();}

@@ -1,0 +1,1 @@
+function initSidebar(){} function openSidebar(loc){document.querySelector("#sidebar-title").textContent=loc.name;document.querySelector("#sidebar-desc").textContent=loc.desc||"";document.querySelector("#sidebar-category").textContent=loc.type;document.querySelector("#sidebar").classList.add("active");}
