@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com">
 
     <style>
         * {
@@ -15,9 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        html,
-        body,
-        #map {
+        html, body, #map {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -28,6 +26,7 @@
             display: none !important;
         }
 
+        /* Google Maps 風格：左側資訊面板 */
         .google-sidebar {
             position: absolute;
             top: 12px;
@@ -123,6 +122,25 @@
             pointer-events: none;
             backdrop-filter: blur(2px);
         }
+
+        /* 🪐 現代日本機構圓點標籤樣式 */
+        .custom-jp-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 13px; /* 略為放大字體以容納符號 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .custom-jp-marker:hover {
+            transform: scale(1.2);
+            z-index: 9999 !important;
+        }
     </style>
 </head>
 <body>
@@ -144,7 +162,7 @@
         縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com"></script>
     <script>
         const mapWidth = 4000;
         const mapHeight = 4000;
@@ -158,25 +176,86 @@
             maxZoom: 3
         });
 
-        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/main/Frame%204.jpg';
+        const mapImageUrl = 'https://githubusercontent.com';
 
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
-        const centerCoords = [mapHeight / 2, mapWidth / 2];
-        const testMarker = L.marker(centerCoords).addTo(map);
+        // 🎯 根據日本現代機構屬性返回對應的顏色與記號
+        function getMarkerStyle(type) {
+            switch(type) {
+                case '郵局':
+                case '郵便局':
+                    return { color: '#f44336', text: '〒' }; // 日本郵政經典紅與郵局符號
+                case '學校':
+                case '教育':
+                    return { color: '#00a0a0', text: '文' }; // 日本地圖學校通用「文」字
+                case '景點':
+                case '觀光':
+                case '公園':
+                    return { color: '#4caf50', text: '景' }; // 觀光與綠地用生態綠
+                case '車站':
+                case '交通':
+                case '鐵道':
+                    return { color: '#1a237e', text: '駅' }; // 交通深藍色
+                case '行政':
+                case '警署':
+                case '醫院':
+                    return { color: '#2196f3', text: '公' }; // 公共市政藍
+                case '商店':
+                case '餐廳':
+                    return { color: '#ff9800', text: '商' }; // 商業橙黃色
+                default:
+                    return { color: '#757575', text: '•' }; // 未分類預設灰點
+            }
+        }
 
-        testMarker.on('click', function(event) {
-            L.DomEvent.stopPropagation(event);
-            map.panTo(centerCoords, { animate: true, duration: 0.5 });
+        // 動態載入外部 JSON 景點資料庫
+        fetch('locations.json')
+            .then(response => {
+                if (!response.ok) throw new Error('無法讀取地標資料庫');
+                return response.json();
+            })
+            .then(data => {
+                data.forEach(loc => {
+                    const style = getMarkerStyle(loc.type);
 
-            document.getElementById('sidebar-hero').style.backgroundColor = '#475569';
-            document.getElementById('sidebar-title').innerText = '世界中心點';
-            document.getElementById('sidebar-category').innerText = '架空地圖 - 起點系統';
-            document.getElementById('sidebar-desc').innerText = '地圖已成功載入。這個藍色標記位於底圖正中央，也就是座標 (2000, 2000)。';
-            document.getElementById('sidebar').classList.add('active');
-        });
+                    // 建立自訂的現代地圖風圖標
+                    const jpIcon = L.divIcon({
+                        className: 'custom-jp-marker',
+                        html: style.text,
+                        iconSize:,       
+                        iconAnchor: [13, 13]
+                    });
+
+                    const marker = L.marker(loc.coords, { icon: jpIcon }).addTo(map);
+                    
+                    // 將背景色灌入對應的圖標元素中
+                    marker.getElement().style.backgroundColor = style.color;
+
+                    marker.on('click', function(event) {
+                        L.DomEvent.stopPropagation(event);
+                        map.panTo(loc.coords, { animate: true, duration: 0.5 });
+
+                        if (loc.image && loc.image.trim() !== "") {
+                            document.getElementById('sidebar-hero').style.backgroundImage = `url('${loc.image}')`;
+                            document.getElementById('sidebar-hero').style.backgroundColor = 'transparent';
+                        } else {
+                            document.getElementById('sidebar-hero').style.backgroundImage = 'none';
+                            document.getElementById('sidebar-hero').style.backgroundColor = style.color;
+                        }
+
+                        document.getElementById('sidebar-title').innerText = loc.name;
+                        document.getElementById('sidebar-category').innerText = `【${loc.type || '未分類'}】${loc.category}`;
+                        document.getElementById('sidebar-desc').innerText = loc.desc;
+                        document.getElementById('sidebar').classList.add('active');
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('資料庫加載失敗:', error);
+            });
 
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('active');
@@ -184,7 +263,6 @@
 
         map.on('click', function(event) {
             closeSidebar();
-
             const clickY = Math.round(event.latlng.lat);
             const clickX = Math.round(event.latlng.lng);
             const imagePixelY = mapHeight - clickY;
