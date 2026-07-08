@@ -161,8 +161,9 @@
         // 定義完整邊界 [[0, 0], [高, 寬]]
         const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
-        // 3. 【核心修正】直接指向 GitHub 官方 raw 端的絕對網址，並將空格轉為 %20 避開瀏覽器解析 Bug
-        const mapImageUrl = 'https://githubusercontent.com';
+        // 3. 【黃金修正點】使用相對路徑，並直接將空格寫成標準的網頁 URL 編碼 %20
+        // 這能徹底擺脫跨網域 CORS 封鎖，同時讓 GitHub Pages 能精確找到同資料夾下的圖片
+        const mapImageUrl = 'Frame%204.jpg';
 
         // 將架空底圖鋪上網頁
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
