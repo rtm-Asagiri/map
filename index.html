@@ -4,29 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ooogle 地圖</title>
-    <!-- 引入 Leaflet 官方完整樣式 -->
-    <link rel="stylesheet" href="https://unpkg.com" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
     <style>
-        /* 全域重設 */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        html, body, #map {
+
+        html,
+        body,
+        #map {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0d1117; /* 地圖外的虛無背景色 */
+            background-color: #0d1117;
         }
 
-        /* 隱藏預設 popup */
         .leaflet-popup {
             display: none !important;
         }
 
-        /* Google Maps 風格：左側資訊面板 */
         .google-sidebar {
             position: absolute;
             top: 12px;
@@ -36,7 +37,7 @@
             height: calc(100% - 24px);
             background: white;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -44,11 +45,11 @@
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
+
         .google-sidebar.active {
             transform: translateX(0);
         }
 
-        /* 面板圖片區 */
         .sidebar-hero {
             width: 100%;
             height: 220px;
@@ -57,6 +58,7 @@
             background-color: #f0f0f0;
             position: relative;
         }
+
         .close-btn {
             position: absolute;
             top: 12px;
@@ -66,7 +68,7 @@
             background: white;
             border: none;
             border-radius: 50%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
@@ -75,22 +77,24 @@
             align-items: center;
             justify-content: center;
         }
+
         .close-btn:hover {
             background: #f1f3f4;
         }
 
-        /* 面板內容區 */
         .sidebar-content {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
         }
+
         .sidebar-title {
             font-size: 22px;
             font-weight: 500;
             color: #202124;
             margin-bottom: 8px;
         }
+
         .sidebar-category {
             font-size: 14px;
             color: #70757a;
@@ -98,13 +102,13 @@
             border-bottom: 1px solid #e8eaed;
             padding-bottom: 12px;
         }
+
         .sidebar-desc {
             font-size: 15px;
             line-height: 1.5;
             color: #3c4043;
         }
 
-        /* 迷你狀態容器 */
         .map-status-container {
             position: absolute;
             bottom: 12px;
@@ -115,18 +119,16 @@
             border-radius: 4px;
             font-size: 11px;
             color: #5f6368;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             pointer-events: none;
             backdrop-filter: blur(2px);
         }
     </style>
 </head>
 <body>
-
-    <!-- 左側 Google 風格面板 -->
     <div id="sidebar" class="google-sidebar">
         <div id="sidebar-hero" class="sidebar-hero">
-            <button class="close-btn" onclick="closeSidebar()">×</button>
+            <button class="close-btn" type="button" onclick="closeSidebar()">x</button>
         </div>
         <div class="sidebar-content">
             <h2 id="sidebar-title" class="sidebar-title">地點名稱</h2>
@@ -135,75 +137,62 @@
         </div>
     </div>
 
-    <!-- 地圖容器 -->
     <div id="map"></div>
 
-    <!-- 右下角狀態容器 -->
     <div id="status-container" class="map-status-container">
-        中心座標 (Y, X): <span id="status-coords">0, 0</span> | 縮放倍率: <span id="status-zoom">0</span>
+        中心座標 (Y, X): <span id="status-coords">0, 0</span> |
+        縮放倍率: <span id="status-zoom">0</span>
     </div>
 
-    <!-- 引入 Leaflet 官方完整主程式 -->
-    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. 定義地圖尺寸 (4000x4000)
         const mapWidth = 4000;
         const mapHeight = 4000;
+        const mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
-        // 2. 初始化 Leaflet 直角地圖
         const map = L.map('map', {
             crs: L.CRS.Simple,
             zoomControl: false,
-            minZoom: -3, // 讓 4000x4000 的大圖可以縮小看全貌
+            attributionControl: false,
+            minZoom: -3,
             maxZoom: 3
         });
 
-        // 定義完整邊界 [[0, 0], [高, 寬]]
-        const mapBounds = [[0, 0], [mapHeight, mapWidth]];
+        const mapImageUrl = 'https://raw.githubusercontent.com/rtm-Asagiri/map/main/Frame%204.jpg';
 
-        // 3. 【黃金修正點】使用相對路徑，並直接將空格寫成標準的網頁 URL 編碼 %20
-        // 這能徹底擺脫跨網域 CORS 封鎖，同時讓 GitHub Pages 能精確找到同資料夾下的圖片
-        const mapImageUrl = 'Frame%204.jpg';
-
-        // 將架空底圖鋪上網頁
         L.imageOverlay(mapImageUrl, mapBounds).addTo(map);
-
-        // 限制地圖視野範圍並置中
         map.fitBounds(mapBounds);
         map.setMaxBounds(mapBounds);
 
-        // 4. 初始化一個「世界中心」測試標記 (位於 2000, 2000)
         const centerCoords = [mapHeight / 2, mapWidth / 2];
         const testMarker = L.marker(centerCoords).addTo(map);
 
-        // 點擊地標互動事件
-        testMarker.on('click', function(e) {
-            L.DomEvent.stopPropagation(e); // 阻止地圖點擊事件干擾
+        testMarker.on('click', function(event) {
+            L.DomEvent.stopPropagation(event);
             map.panTo(centerCoords, { animate: true, duration: 0.5 });
-            
-            // 填入測試用資訊
+
             document.getElementById('sidebar-hero').style.backgroundColor = '#475569';
-            document.getElementById('sidebar-title').innerText = "世界中心點";
-            document.getElementById('sidebar-category').innerText = "架空地圖 • 起點系統";
-            document.getElementById('sidebar-desc').innerText = "太棒了！地圖已經成功連線！畫面中間的藍色 Pin 針是系統預設在地圖正中央 (2000, 2000) 的測試錨點。點擊這裡就能觸發左側的 Google 風格抽屜。";
-            
+            document.getElementById('sidebar-title').innerText = '世界中心點';
+            document.getElementById('sidebar-category').innerText = '架空地圖 - 起點系統';
+            document.getElementById('sidebar-desc').innerText = '地圖已成功載入。這個藍色標記位於底圖正中央，也就是座標 (2000, 2000)。';
             document.getElementById('sidebar').classList.add('active');
         });
 
-        // 關閉左側面板
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        // 點擊地圖空白處：收回左側抽屜 ＆ 在 Console 印出該點座標
-        map.on('click', function(e) {
+        map.on('click', function(event) {
             closeSidebar();
-            const clickY = Math.round(e.latlng.lat);
-            const clickX = Math.round(e.latlng.lng);
-            console.log(`點擊點座標為 -> coords: [${clickY}, ${clickX}]`);
+
+            const clickY = Math.round(event.latlng.lat);
+            const clickX = Math.round(event.latlng.lng);
+            const imagePixelY = mapHeight - clickY;
+
+            console.log(`Leaflet 座標 -> coords: [${clickY}, ${clickX}]`);
+            console.log(`圖片像素座標 -> x: ${clickX}, y: ${imagePixelY}`);
         });
 
-        // 右下角狀態欄更新
         function updateStatus() {
             const center = map.getCenter();
             document.getElementById('status-coords').innerText = `${Math.round(center.lat)}, ${Math.round(center.lng)}`;
