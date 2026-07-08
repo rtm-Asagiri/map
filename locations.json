@@ -1,0 +1,32 @@
+[
+  {
+    "id": "tokyo_station",
+
+    "name": "東京車站",
+
+    "type": "station",
+
+    "area": "東京都",
+
+    "coords": [2550,1880],
+
+    "image": "assets/images/tokyo_station.jpg",
+
+    "desc": "東京最大的車站",
+
+    "tags": [
+      "JR",
+      "新幹線"
+    ]
+  },
+
+  {
+    "id": "ueno_park",
+
+    "name": "上野公園",
+
+    "type": "park",
+
+    "coords": [2150,1640]
+  }
+]
