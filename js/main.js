@@ -104,7 +104,25 @@ window.addEventListener("navigationReady", () => {
 
     console.log("導航資料完成");
 
-    drawNodes();
+    function drawNodes(){
+
+    window.nodes.forEach(n=>{
+
+        L.circleMarker(
+            [
+                n.y,
+                n.x
+            ],
+            {
+                radius:4,
+                color:"red"
+            }
+        )
+        .addTo(map);
+
+    });
+
+}
 
 });
 
