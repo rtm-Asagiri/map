@@ -1,112 +1,49 @@
-// =============================
-// main.js
-// 只負責導航互動，不建立地圖
-// =============================
+let startNode=null;
+let endNode=null;
 
-let startNode = null;
-let endNode = null;
-
-let startMarker = null;
-let endMarker = null;
-let routeLine = null;
+let startMarker=null;
+let endMarker=null;
+let routeLine=null;
 
 
-// -------------------------
-// 找最近節點
-// -------------------------
-function nearestNode(x, y) {
 
-    let best = null;
-    let dist = Infinity;
+function nearestNode(x,y){
 
-    window.nodes.forEach(n => {
+    let best=null;
+    let dist=Infinity;
 
-        const d = Math.hypot(
-            n.x - x,
-            n.y - y
+
+    window.nodes.forEach(n=>{
+
+
+        let d=Math.hypot(
+            n.x-x,
+            n.y-y
         );
 
-        if (d < dist) {
-            dist = d;
-            best = n;
+
+        if(d<dist){
+
+            dist=d;
+            best=n;
+
         }
 
+
     });
+
 
     return best;
 
 }
 
 
-// -------------------------
-// 畫導航線
-// -------------------------
-function drawRoute(route) {
 
-    if (!route || route.length === 0) {
+function drawNodes(){
 
-        alert("找不到路徑");
-
-        return;
-
-    }
-
-    if (routeLine) {
-
-        map.removeLayer(routeLine);
-
-    }
-
-    const points = route.map(id => {
-
-        const n = window.nodes.find(node => node.id === id);
-
-        return [n.y, n.x];
-
-    });
-
-    routeLine = L.polyline(points, {
-
-        color: "red",
-        weight: 6
-
-    }).addTo(map);
-
-    map.fitBounds(routeLine.getBounds());
-
-}
-
-
-// -------------------------
-// 畫所有導航節點
-// -------------------------
-function drawNodes() {
-
-    window.nodes.forEach(n => {
-
-        L.circleMarker(
-            [n.y, n.x],
-            {
-                radius: 4,
-                color: "red"
-            }
-        ).addTo(map);
-
-    });
-
-}
-
-
-// -------------------------
-// 等導航資料載入完成
-// -------------------------
-window.addEventListener("navigationReady", () => {
-
-    console.log("導航資料完成");
-
-    function drawNodes(){
 
     window.nodes.forEach(n=>{
+
 
         L.circleMarker(
             [
@@ -114,113 +51,181 @@ window.addEventListener("navigationReady", () => {
                 n.x
             ],
             {
-                radius:4,
+                radius:3,
                 color:"red"
             }
         )
         .addTo(map);
 
+
     });
+
 
 }
 
+
+
+window.addEventListener(
+"navigationReady",
+()=>{
+
+
+console.log(
+"導航完成"
+);
+
+
+drawNodes();
+
+
 });
 
 
-// -------------------------
-// 點地圖開始導航
-// -------------------------
-map.on("click", function (e) {
 
-    // 如果資料還沒載完
-    if (!window.nodes || window.nodes.length === 0) {
 
-        console.warn("導航資料尚未完成");
 
-        return;
+map.on(
+"click",
+function(e){
 
-    }
 
-    const x = e.latlng.lng;
-    const y = e.latlng.lat;
+if(
+!window.nodes.length
+){
 
-    const node = nearestNode(x, y);
+console.log(
+"nodes未完成"
+);
 
-    // ---------- 起點 ----------
-    if (!startNode) {
+return;
 
-        startNode = node;
+}
 
-        if (startMarker) {
 
-            map.removeLayer(startMarker);
 
-        }
+const node =
+nearestNode(
+e.latlng.lng,
+e.latlng.lat
+);
 
-        startMarker = L.marker([node.y, node.x])
-            .addTo(map)
-            .bindPopup("起點")
-            .openPopup();
 
-        return;
 
-    }
+if(!node)
+return;
 
-    // ---------- 終點 ----------
-    if (!endNode) {
 
-        endNode = node;
 
-        if (endMarker) {
+// 第一次點
+if(!startNode){
 
-            map.removeLayer(endMarker);
 
-        }
+startNode=node;
 
-        endMarker = L.marker([node.y, node.x])
-            .addTo(map)
-            .bindPopup("終點");
 
-        const route = findPath(
-            startNode.id,
-            endNode.id
-        );
+startMarker=
+L.marker(
+[node.y,node.x]
+)
+.addTo(map)
+.bindPopup(
+"起點"
+)
+.openPopup();
 
-        drawRoute(route);
 
-        return;
+return;
 
-    }
+}
 
-    // ---------- 第三次點擊重新導航 ----------
 
-    startNode = node;
-    endNode = null;
 
-    if (routeLine) {
+// 第二次點
+if(!endNode){
 
-        map.removeLayer(routeLine);
-        routeLine = null;
 
-    }
+endNode=node;
 
-    if (startMarker) {
 
-        map.removeLayer(startMarker);
+endMarker=
+L.marker(
+[node.y,node.x]
+)
+.addTo(map)
+.bindPopup(
+"終點"
+);
 
-    }
 
-    if (endMarker) {
 
-        map.removeLayer(endMarker);
+const route =
+findPath(
+startNode.id,
+endNode.id
+);
 
-        endMarker = null;
 
-    }
+drawRoute(route);
 
-    startMarker = L.marker([node.y, node.x])
-        .addTo(map)
-        .bindPopup("起點")
-        .openPopup();
+
+
+return;
+
+}
+
+
+
 
 });
+
+
+
+
+
+
+function drawRoute(route){
+
+
+if(!route)
+return;
+
+
+
+const points =
+route.map(id=>{
+
+
+let n=
+window.nodes.find(
+x=>x.id===id
+);
+
+
+return [
+n.y,
+n.x
+];
+
+
+});
+
+
+
+routeLine=
+L.polyline(
+points,
+{
+color:"red",
+weight:5
+}
+)
+.addTo(map);
+
+
+
+map.fitBounds(
+routeLine.getBounds()
+);
+
+
+}
