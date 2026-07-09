@@ -132,3 +132,15 @@ L.imageOverlay(
 
 
 map.fitBounds(bounds);
+nodes.forEach(n=>{
+
+ L.circleMarker(
+    [n.y,n.x],
+    {
+      radius:4,
+      color:"red"
+    }
+ )
+ .addTo(map);
+
+});
