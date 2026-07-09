@@ -3,20 +3,6 @@ let map = L.map("map", {
     minZoom: -3
 });
 
-
-let bounds=[
-    [0,0],
-    [5000,5000]
-];
-
-
-L.imageOverlay(
-    "data/map/world.svg",
-    bounds
-)
-.addTo(map);
-
-
 map.fitBounds(bounds);
 let startNode = null;
 let endNode = null;
