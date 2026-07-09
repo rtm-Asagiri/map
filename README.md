@@ -1,5 +1,9 @@
-## 仁浦市線上地圖
+## AsaMap
+
+### Google地圖風格的架空地圖
+
 ChatGPT負責大部分程式
+本專案適用CC BY 4.0
 
 地圖:https://rtm-asagiri.github.io/map/
 
