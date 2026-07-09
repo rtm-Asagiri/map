@@ -1,26 +1,34 @@
-map.fitBounds(bounds);
+// =============================
+// main.js
+// 只負責導航互動，不建立地圖
+// =============================
+
 let startNode = null;
 let endNode = null;
 
-let routeLine;
+let startMarker = null;
+let endMarker = null;
+let routeLine = null;
 
 
-// 尋找最近節點
-function nearestNode(x,y){
+// -------------------------
+// 找最近節點
+// -------------------------
+function nearestNode(x, y) {
 
-    let best=null;
-    let dist=Infinity;
+    let best = null;
+    let dist = Infinity;
 
-    nodes.forEach(n=>{
+    window.nodes.forEach(n => {
 
-        let d=Math.hypot(
-            n.x-x,
-            n.y-y
+        const d = Math.hypot(
+            n.x - x,
+            n.y - y
         );
 
-        if(d<dist){
-            dist=d;
-            best=n;
+        if (d < dist) {
+            dist = d;
+            best = n;
         }
 
     });
@@ -30,139 +38,171 @@ function nearestNode(x,y){
 }
 
 
+// -------------------------
+// 畫導航線
+// -------------------------
+function drawRoute(route) {
 
-// 點擊地圖
-map.on("click",function(e){
+    if (!route || route.length === 0) {
 
+        alert("找不到路徑");
 
-    let x=e.latlng.lng;
-    let y=e.latlng.lat;
-
-
-    let node=nearestNode(x,y);
-
-
-    if(!startNode){
-
-        startNode=node;
-
-        L.marker(
-            [node.y,node.x]
-        )
-        .addTo(map)
-        .bindPopup("起點")
-        .openPopup();
+        return;
 
     }
 
-    else if(!endNode){
+    if (routeLine) {
 
-        endNode=node;
-
-
-        L.marker(
-            [node.y,node.x]
-        )
-        .addTo(map)
-        .bindPopup("終點");
-
-
-        let route=findPath(
-            startNode.id,
-            endNode.id
-        );
-
-
-        drawRoute(route);
+        map.removeLayer(routeLine);
 
     }
 
-});
-function drawRoute(route){
+    const points = route.map(id => {
 
+        const n = window.nodes.find(node => node.id === id);
 
-let points=[];
+        return [n.y, n.x];
 
+    });
 
-route.forEach(id=>{
+    routeLine = L.polyline(points, {
 
+        color: "red",
+        weight: 6
 
-    let n=
-    nodes.find(
-        x=>x.id===id
-    );
+    }).addTo(map);
 
-
-    points.push([
-        n.y,
-        n.x
-    ]);
-
-
-});
-
-
-
-routeLine=L.polyline(
-    points,
-    {
-        color:"red",
-        weight:6
-    }
-)
-.addTo(map);
-
-
-map.fitBounds(
-    routeLine.getBounds()
-);
-
+    map.fitBounds(routeLine.getBounds());
 
 }
-let bounds=[
-    [0,0],
-    [5000,5000]
-];
 
 
-L.imageOverlay(
-    "data/map/world.svg",
-    bounds
-)
-.addTo(map);
+// -------------------------
+// 畫所有導航節點
+// -------------------------
+function drawNodes() {
 
-
-map.fitBounds(bounds);
-function drawNodes(){
-
-    window.nodes.forEach(n=>{
+    window.nodes.forEach(n => {
 
         L.circleMarker(
-            [
-                n.y,
-                n.x
-            ],
+            [n.y, n.x],
             {
-                radius:4,
-                color:"red"
+                radius: 4,
+                color: "red"
             }
-        )
-        .addTo(map);
+        ).addTo(map);
 
     });
 
 }
 
-window.addEventListener(
-    "navigationReady",
-    ()=>{
 
-        console.log(
-            "節點載入完成:",
-            window.nodes.length
-        );
+// -------------------------
+// 等導航資料載入完成
+// -------------------------
+window.addEventListener("navigationReady", () => {
 
-        drawNodes();
+    console.log("導航資料完成");
+
+    drawNodes();
+
+});
+
+
+// -------------------------
+// 點地圖開始導航
+// -------------------------
+map.on("click", function (e) {
+
+    // 如果資料還沒載完
+    if (!window.nodes || window.nodes.length === 0) {
+
+        console.warn("導航資料尚未完成");
+
+        return;
 
     }
-);
+
+    const x = e.latlng.lng;
+    const y = e.latlng.lat;
+
+    const node = nearestNode(x, y);
+
+    // ---------- 起點 ----------
+    if (!startNode) {
+
+        startNode = node;
+
+        if (startMarker) {
+
+            map.removeLayer(startMarker);
+
+        }
+
+        startMarker = L.marker([node.y, node.x])
+            .addTo(map)
+            .bindPopup("起點")
+            .openPopup();
+
+        return;
+
+    }
+
+    // ---------- 終點 ----------
+    if (!endNode) {
+
+        endNode = node;
+
+        if (endMarker) {
+
+            map.removeLayer(endMarker);
+
+        }
+
+        endMarker = L.marker([node.y, node.x])
+            .addTo(map)
+            .bindPopup("終點");
+
+        const route = findPath(
+            startNode.id,
+            endNode.id
+        );
+
+        drawRoute(route);
+
+        return;
+
+    }
+
+    // ---------- 第三次點擊重新導航 ----------
+
+    startNode = node;
+    endNode = null;
+
+    if (routeLine) {
+
+        map.removeLayer(routeLine);
+        routeLine = null;
+
+    }
+
+    if (startMarker) {
+
+        map.removeLayer(startMarker);
+
+    }
+
+    if (endMarker) {
+
+        map.removeLayer(endMarker);
+
+        endMarker = null;
+
+    }
+
+    startMarker = L.marker([node.y, node.x])
+        .addTo(map)
+        .bindPopup("起點")
+        .openPopup();
+
+});
