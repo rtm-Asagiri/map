@@ -177,9 +177,9 @@
         // 邊界陣列與數值
         const mapWidth = 5000;
         const mapHeight = 5000;
-        const mapBounds = [[0, 0], [mapHeight, mapWidth]];
+        window.mapBounds = [[0, 0], [mapHeight, mapWidth]];
 
-        const map = L.map('map', {
+        window.map = L.map('map', {
             crs: L.CRS.Simple,
             zoomControl: true,
             attributionControl: false,
