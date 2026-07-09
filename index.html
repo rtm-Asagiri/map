@@ -9,6 +9,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 
     <style>
+        .jp-marker-container {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .custom-jp-marker {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            border:2px solid white;
+            border-radius:50%;
+
+            color:white;
+            font-weight:bold;
+            font-size:14px;
+
+            box-shadow:
+                0 2px 6px rgba(0,0,0,.35);
+
+            cursor:pointer;
+            user-select:none;
+        }
         * {
             box-sizing: border-box;
             margin: 0;
@@ -130,7 +153,8 @@
             align-items: center;
             justify-content: center;
             border: 2px solid white;
-            border-radius: 50%;
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
             color: white;
             font-weight: bold;
             font-size: 13px;
@@ -140,6 +164,9 @@
         }
         .custom-jp-marker:hover {
             transform:scale(1.2);
+        .custom-jp-marker span{
+        transform:rotate(45deg);
+        }
         }
         }
     </style>
@@ -290,29 +317,7 @@
             .catch(err => {
                 console.error("載入地標失敗，可能找不到 locations.json 檔案:", err);
             });
-            .jp-marker-container {
-    background: transparent !important;
-    border: none !important;
-}
-
-.custom-jp-marker {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border:2px solid white;
-    border-radius:50%;
-
-    color:white;
-    font-weight:bold;
-    font-size:14px;
-
-    box-shadow:
-        0 2px 6px rgba(0,0,0,.35);
-
-    cursor:pointer;
-    user-select:none;
-}
+            
     </script>
 </body>
 </html>
