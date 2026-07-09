@@ -1,7 +1,3 @@
-let map = L.map("map", {
-    crs: L.CRS.Simple,
-    minZoom: -3
-});
 
 map.fitBounds(bounds);
 let startNode = null;
