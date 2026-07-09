@@ -153,8 +153,6 @@ function drawNodes(){
 
 }
 
-
-// 等導航資料載入完成
 window.addEventListener(
     "navigationReady",
     ()=>{
