@@ -1,49 +1,67 @@
 console.log("navigation loaded");
 
 
-window.nodes = [];
-window.edges = [];
-
-
-// 建立完成通知
-window.navigationReady = false;
+window.nodes=[];
+window.edges=[];
 
 
 async function loadNavigation(){
 
-    const nodesResponse =
-        await fetch("data/navigation/nodes.json");
+    try{
 
-    window.nodes =
-        await nodesResponse.json();
-
-
-
-    const edgesResponse =
-        await fetch("data/navigation/edges.json");
-
-    window.edges =
-        await edgesResponse.json();
+        const nodes =
+            await fetch(
+            "./data/navigation/nodes.json"
+            )
+            .then(r=>r.json());
 
 
-
-    console.log(
-        "nodes:",
-        window.nodes.length
-    );
-
-    console.log(
-        "edges:",
-        window.edges.length
-    );
+        const edges =
+            await fetch(
+            "./data/navigation/edges.json"
+            )
+            .then(r=>r.json());
 
 
-    window.navigationReady = true;
+        // 過濾錯誤節點
+        window.nodes =
+            nodes.filter(
+                n =>
+                n.x!=null &&
+                n.y!=null
+            );
 
 
-    window.dispatchEvent(
-        new Event("navigationReady")
-    );
+        window.edges=edges;
+
+
+        console.log(
+            "nodes:",
+            window.nodes.length
+        );
+
+        console.log(
+            "edges:",
+            window.edges.length
+        );
+
+
+        window.dispatchEvent(
+            new Event(
+            "navigationReady"
+            )
+        );
+
+
+    }
+    catch(e){
+
+        console.error(
+            "navigation error",
+            e
+        );
+
+    }
 
 }
 
