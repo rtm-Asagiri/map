@@ -10,7 +10,7 @@ let endNode = null;
 let routeLine;
 
 
-// 找最近節點
+// 尋找最近節點
 function nearestNode(x,y){
 
     let best=null;
