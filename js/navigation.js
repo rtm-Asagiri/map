@@ -1,3 +1,11 @@
+console.log("navigation loaded");
+fetch("data/navigation/nodes.json")
+.then(r=>r.json())
+.then(data=>{
+
+    console.log("nodes:",data);
+
+});
 fetch("data/navigation/nodes.json")
 .then(r=>r.json())
 .then(nodes=>{
