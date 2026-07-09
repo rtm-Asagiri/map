@@ -152,15 +152,38 @@ L.imageOverlay(
 
 
 map.fitBounds(bounds);
-nodes.forEach(n=>{
+function drawNodes(){
 
- L.circleMarker(
-    [n.y,n.x],
-    {
-      radius:4,
-      color:"red"
+    window.nodes.forEach(n=>{
+
+        L.circleMarker(
+            [
+                n.y,
+                n.x
+            ],
+            {
+                radius:4,
+                color:"red"
+            }
+        )
+        .addTo(map);
+
+    });
+
+}
+
+
+// 等導航資料載入完成
+window.addEventListener(
+    "navigationReady",
+    ()=>{
+
+        console.log(
+            "節點載入完成:",
+            window.nodes.length
+        );
+
+        drawNodes();
+
     }
- )
- .addTo(map);
-
-});
+);
