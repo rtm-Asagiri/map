@@ -322,7 +322,7 @@ function findPath(start,end){
 
 
     console.warn(
-        "找不到路徑"
+        "嘿嘿,我找不到路徑"
     );
 
 
