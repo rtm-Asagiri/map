@@ -1,20 +1,51 @@
 console.log("navigation loaded");
-fetch("data/navigation/nodes.json")
-.then(r=>r.json())
-.then(data=>{
-
-    console.log("nodes:",data);
-
-});
-fetch("data/navigation/nodes.json")
-.then(r=>r.json())
-.then(nodes=>{
-    window.nodes = nodes;
-});
 
 
-fetch("data/navigation/edges.json")
-.then(r=>r.json())
-.then(edges=>{
-    window.edges = edges;
-});
+window.nodes = [];
+window.edges = [];
+
+
+// 建立完成通知
+window.navigationReady = false;
+
+
+async function loadNavigation(){
+
+    const nodesResponse =
+        await fetch("data/navigation/nodes.json");
+
+    window.nodes =
+        await nodesResponse.json();
+
+
+
+    const edgesResponse =
+        await fetch("data/navigation/edges.json");
+
+    window.edges =
+        await edgesResponse.json();
+
+
+
+    console.log(
+        "nodes:",
+        window.nodes.length
+    );
+
+    console.log(
+        "edges:",
+        window.edges.length
+    );
+
+
+    window.navigationReady = true;
+
+
+    window.dispatchEvent(
+        new Event("navigationReady")
+    );
+
+}
+
+
+loadNavigation();
