@@ -26,7 +26,6 @@ button{
 
 <h2>SVG路徑轉導航節點小工具</h2>
 
-
 <input type="file" id="file" accept=".svg">
 
 <br>
@@ -35,9 +34,7 @@ button{
 開始轉換
 </button>
 
-
 <p id="status"></p>
-
 
 
 <script>
@@ -48,6 +45,9 @@ button{
 // =======================
 
 const tolerance = 3;
+
+// SVG 高度
+const MAP_HEIGHT = 5000;
 
 
 
@@ -73,7 +73,6 @@ function distance(a,b){
 function getNode(nodes,p){
 
 
-    // 防止 null
     if(
         !Number.isFinite(p.x) ||
         !Number.isFinite(p.y)
@@ -100,18 +99,15 @@ function getNode(nodes,p){
     const id="N"+nodes.length;
 
 
-
     nodes.push({
 
         id:id,
 
-        // 保留 SVG 座標
         x:p.x,
 
         y:p.y
 
     });
-
 
 
     return id;
@@ -126,19 +122,14 @@ function getNode(nodes,p){
 
 function parsePath(d){
 
-
     let result=[];
-
 
     let regex=/([MLHV])([^MLHV]*)/g;
 
-
     let m;
-
 
     let x=0;
     let y=0;
-
 
 
     while(
@@ -149,7 +140,7 @@ function parsePath(d){
         const type=m[1];
 
 
-        const nums=
+        const nums =
             m[2]
             .trim()
             .split(/[\s,]+/)
@@ -254,11 +245,9 @@ function parsePath(d){
     }
 
 
-
     return result;
 
 }
-
 
 
 
@@ -269,11 +258,10 @@ function parsePath(d){
 function convert(){
 
 
-const file=
+const file =
 document
 .getElementById("file")
 .files[0];
-
 
 
 if(!file)
@@ -288,16 +276,13 @@ const reader=new FileReader();
 reader.onload=function(){
 
 
-
 const text=reader.result;
-
 
 
 const parser=new DOMParser();
 
 
-
-const svg=
+const svg =
 parser.parseFromString(
 text,
 "image/svg+xml"
@@ -305,9 +290,9 @@ text,
 
 
 
-const paths=
+const paths =
 [
-...svg.querySelectorAll("path")
+    ...svg.querySelectorAll("path")
 ];
 
 
@@ -319,20 +304,57 @@ let segments=[];
 paths.forEach(p=>{
 
 
-    const d=
+    const d =
     p.getAttribute("d");
+
 
 
     if(d){
 
-        segments.push(
-            ...parsePath(d)
-        );
+
+        const rawSegments =
+        parsePath(d);
+
+
+
+        // ⭐ SVG 座標翻轉
+        rawSegments.forEach(seg=>{
+
+
+            segments.push([
+
+
+                {
+
+                    x:seg[0].x,
+
+                    y:
+                    MAP_HEIGHT - seg[0].y
+
+                },
+
+
+                {
+
+                    x:seg[1].x,
+
+                    y:
+                    MAP_HEIGHT - seg[1].y
+
+                }
+
+
+            ]);
+
+
+        });
+
 
     }
 
 
 });
+
 
 
 
@@ -343,20 +365,17 @@ let edges=[];
 
 
 
-
 segments.forEach(seg=>{
 
 
-
-    const a=
+    const a =
     getNode(
         nodes,
         seg[0]
     );
 
 
-
-    const b=
+    const b =
     getNode(
         nodes,
         seg[1]
@@ -364,10 +383,7 @@ segments.forEach(seg=>{
 
 
 
-    if(
-        a &&
-        b
-    ){
+    if(a && b){
 
 
         edges.push({
@@ -392,7 +408,6 @@ segments.forEach(seg=>{
 
 
 });
-
 
 
 
@@ -428,7 +443,7 @@ edges
 
 document
 .getElementById("status")
-.innerHTML=
+.innerHTML =
 `
 完成<br>
 節點:${nodes.length}<br>
@@ -448,7 +463,6 @@ reader.readAsText(file);
 
 
 
-
 // =======================
 // 下載
 // =======================
@@ -456,7 +470,7 @@ reader.readAsText(file);
 function download(name,data){
 
 
-const blob=
+const blob =
 new Blob(
 [data],
 {
@@ -466,12 +480,14 @@ type:"application/json"
 
 
 
-const a=
+const a =
 document.createElement("a");
 
 
-a.href=
+
+a.href =
 URL.createObjectURL(blob);
+
 
 
 a.download=name;
@@ -484,7 +500,6 @@ a.click();
 
 
 
-
 // =======================
 // 預覽
 // =======================
@@ -492,7 +507,7 @@ a.click();
 function createPreview(nodes,edges){
 
 
-let svg=`
+let svg = `
 
 <svg xmlns="http://www.w3.org/2000/svg"
 width="5000"
@@ -506,20 +521,21 @@ viewBox="0 0 5000 5000">
 edges.forEach(e=>{
 
 
-let a=
+let a =
 nodes.find(
 n=>n.id===e.from
 );
 
 
-let b=
+
+let b =
 nodes.find(
 n=>n.id===e.to
 );
 
 
 
-svg+=`
+svg += `
 
 <line
 
@@ -545,7 +561,7 @@ stroke-width="3"
 nodes.forEach(n=>{
 
 
-svg+=`
+svg += `
 
 <circle
 
@@ -565,7 +581,7 @@ fill="red"
 
 
 
-svg+="</svg>";
+svg += "</svg>";
 
 
 
@@ -575,9 +591,7 @@ svg
 );
 
 
-
 }
-
 
 
 </script>
@@ -586,5 +600,3 @@ svg
 </body>
 
 </html>
-
-}
