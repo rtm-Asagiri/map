@@ -1,4 +1,3 @@
-
 map.fitBounds(bounds);
 let startNode = null;
 let endNode = null;
